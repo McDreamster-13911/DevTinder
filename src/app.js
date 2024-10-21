@@ -7,15 +7,16 @@ require('dotenv').config();
 
 const app = express();
 
+// Middlware to receive and read data in JSON format
+app.use(express.json());
+
+
+
 // APIS
 
 app.post("/signup", async (req,res) => {
-    const userObj = {
-        firstName : "John",
-        lastName : "Doe",
-        emailId : "johndoe@gmail.com",
-        password: "johndoe@123"
-    }
+    // console.log(req.body);
+    const userObj = new User(req.body);
 
     // Creating a new instance of the User Model
     const user = new User(userObj);
