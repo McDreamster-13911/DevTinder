@@ -1,9 +1,10 @@
 const express = require("express");
+const bcrypt = require("bcrypt");
 const connectDB = require("./config/database");
 const User = require("./models/user")
 const PORT = 8000;
 require('dotenv').config();
-
+const {validateSignUpData} = require("./utils/validation");
 
 const app = express();
 
@@ -16,14 +17,34 @@ app.use(express.json());
 // Signup API - POST to add / insert new user
 app.post("/signup", async (req,res) => {
     // console.log(req.body);
-    const userObj = new User(req.body);
 
+    try{
+
+    // Validation of Data
+    validateSignUpData(req);
+
+    const {firstName, lastName, emailId, password, age, gender} = req.body;
+    
+    // Encrypting Password
+    const passwordHash = await bcrypt.hash(password, 10);
+
+  
     // Creating a new instance of the User Model
-    const user = new User(userObj);
+    // const userObj = new User(req.body); // This is a very bad of writing creating the User Instance
 
-    try {
-        await user.save();
-        res.send("User Added Successfully");
+    const userObj = new User({
+      firstName,
+      lastName,
+      emailId,
+      password: passwordHash,
+      age,
+      gender,
+    });
+
+    const user = new User(userObj);
+    
+    await user.save();
+    res.send("User Added Successfully");
     }
     catch(err){
         res.status(400).send(`Error saving the user data : ${err}`);
